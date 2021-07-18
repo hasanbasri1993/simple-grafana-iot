@@ -1,0 +1,70 @@
+version: "3"
+services:
+  db:
+    container_name: db_mysql
+    image: mysql:5.7.34
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - ${ROOTDIR}mysql:/var/lib/mysql
+    ports:
+      - 3306:3306
+    networks:
+      default:
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+  nodered:
+    container_name: nodered
+    image: nodered/node-red:latest
+    restart: always
+    ports:
+      - 1880:1880 
+    volumes:
+      - ${ROOTDIR}nodered:/data
+    networks:
+      default:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+    - 3000:3000
+    volumes:
+    - ${ROOTDIR}grafana/grafana.ini:/etc/grafana/grafana.ini
+    - ${ROOTDIR}grafana:/var/lib/grafana
+    networks:
+      default:
+    restart: always
+    environment:
+      GF_RENDERING_SERVER_URL: http://renderer:8081/render
+      GF_RENDERING_CALLBACK_URL: http://grafana:3000/
+      GF_LOG_FILTERS: rendering:debug
+  renderer:
+    container_name: renderer
+    image: grafana/grafana-image-renderer:latest
+    ports:
+      - 8081
+    environment:
+      ENABLE_METRICS: 'true'
+    networks:
+      default:
+  influxdb:
+    image: influxdb:1.8.5
+    container_name: influxdb
+    ports:
+    - 8086:8086
+    volumes:
+    - ${ROOTDIR}influxdb:/var/lib/influxdb
+    networks:
+      default:
+    restart: always
+  # telegraf:
+  #   image: telegraf:latest
+  #   container_name: telegraf_sim
+  #   volumes:
+  #   - ${ROOTDIR}telegraf/telegraf_sim.conf:/etc/telegraf/telegraf.conf:ro
+networks:
+  default:
+    name: local_network_dev
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24

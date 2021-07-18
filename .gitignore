@@ -1,0 +1,11 @@
+grafana/*
+!grafana/grafana_dir
+
+influxdb/*
+!influxdb/influxdb_dir
+
+mysql/*
+!mysql/mysql_dir
+
+nodered/*
+!nodered/nodered_dir
